@@ -15,8 +15,8 @@ end
 -- set window line numberings?
 -- don't remove formatting
 -- how to provide user-configs, default configs
-function show_man_floatwin(term)
-  -- setup options
+-- have separate lsp-hover-like option
+local function make_floatwin(term)
   local config_defaults = {
     man_height = 0.85,
     man_width = 0.85,
@@ -38,6 +38,9 @@ function show_man_floatwin(term)
   }
   local buf = vim.api.nvim_create_buf(false, true)
 
+  vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { nowait = true, noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(buf, "n", "<ESC>", ":close<CR>", { nowait = true, noremap = true, silent = true })
+
   local man_text = get_tmux_man()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, man_text)
   local cursor_line = nil
@@ -53,13 +56,32 @@ function show_man_floatwin(term)
   end
   local win = vim.api.nvim_open_win(buf, true, win_opts)
   vim.api.nvim_win_set_cursor(win, { cursor_line, 0 })
+
+  return buf, win
+end
+
+function M.show_man_floatwin()
+  local search_term = vim.call("expand", "<cWORD>")
+  make_floatwin(search_term)
 end
 
 -- execute line as tmux command
-function show_man_popup(term)
+function exec_tmux_cmd(line)
+  local Job = require("plenary.job")
 
+  Job:new({
+    command = "tmux",
+    args = line,
+    on_exit = function(j, return_val)
+      if return_val == 1 then
+        print("Command failed: " .. "tmux" .. table.concat(line, " "))
+      end
+    end,
+  }):sync()
 end
 
+-- keyword/highlight group based jump (????)
+
 -- testing
---
--- return M
+
+return M
