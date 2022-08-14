@@ -1,5 +1,7 @@
 local M = {}
+local Job = require("plenary.job")
 
+-- Get tmux man page text.
 -- TODO:
 -- only compute this once, or something
 local function get_tmux_man()
@@ -10,6 +12,7 @@ local function get_tmux_man()
   return lines
 end
 
+-- Build floating window scrolled to entry for the given term.
 -- TODO:
 -- set return cursor point
 -- set window line numberings?
@@ -61,12 +64,15 @@ local function make_floatwin(term)
   return buf, win
 end
 
-function M.show_man_floatwin()
+-- Open floating window with man page entry for term under cursor.
+function M.tmux_show_man_floatwin()
   local search_term = vim.call("expand", "<cWORD>")
   make_floatwin(search_term)
 end
 
-function make_chunk_arrays(result, hl_group)
+
+-- Format command output into chunks to match structure required by nvim_echo()
+local function make_result_chunks(result, hl_group)
   local r = {}
   for i, v in ipairs(result) do
     r[i] = { v .. "\n", hl_group }
@@ -74,11 +80,10 @@ function make_chunk_arrays(result, hl_group)
   return r
 end
 
--- execute line as tmux command
+-- Execute line as tmux command
 -- TODO
 -- capture and print error output
 local function exec_tmux_cmd(line)
-  local Job = require("plenary.job")
 
   local result
   local return_value
@@ -92,17 +97,20 @@ local function exec_tmux_cmd(line)
     end,
   }):sync()
 
-  local arrayed_chunks
+  local result_chunks
   if return_value == 0 then
-    arrayed_chunks = make_chunk_arrays(result)
+    result_chunks = make_result_chunks(result)
   else
-    arrayed_chunks = make_chunk_arrays({ "command failed: " .. table.concat(line, " ") }, "Error")
+    result_chunks = make_result_chunks({ "command failed: " .. table.concat(line, " ") }, "Error")
   end
-  vim.api.nvim_echo(arrayed_chunks, false, {})
+  vim.api.nvim_echo(result_chunks, false, {})
   return return_value
 end
 
+-- Retrieve lines contained by visual selection.
 -- This is copied ~verbatim from... somewhere on Reddit or Stackoverflow.
+-- TODO
+-- Retrieve complete lines, rather than that broken up by block or regular visual mode
 local function get_visual_selection()
   local s_start = vim.fn.getpos("'<")
   local s_end = vim.fn.getpos("'>")
@@ -117,9 +125,10 @@ local function get_visual_selection()
   return table
 end
 
+-- Execute tmux command under current cursor/selection
 -- TODO
 -- more thorough testing, incl. with keymaps
-function M.tmux_exec_current_lines()
+function M.tmux_execute_selection()
   local position = vim.fn.getpos(".")
   local visual_position = vim.fn.getpos("v")
   if position[2] ~= visual_position[2] then
@@ -138,16 +147,9 @@ end
 
 -- keyword/highlight group based jump (????)
 
+-- basic compile equivalent using plenary job
+
 -- testing
 
-
-
-local test = [[
-resize-pane -R 1
-resize-pane -L 2
-list-clients
-list-commands
-reskize-pane -R 1
-]]
 
 return M
