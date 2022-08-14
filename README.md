@@ -12,6 +12,7 @@ Neovim plugin for editing Tmux configuration and scripting files. Consists large
 ## Requirements
 
 * Tmux
+* [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
 ## Installation
 
@@ -20,9 +21,10 @@ With [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
     use({
       "jsstevenson/nvim-tmux",
+      requires = { "nvim-lua/plenary.nvim" },
       config = function()
-        require("nvim_tmux").setup({})
-      end
+        require("nvim_tmux").setup()
+      end,
     })
 ```
 
