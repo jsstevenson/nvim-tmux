@@ -20,6 +20,7 @@ end
 -- how to provide user-configs, default configs
 -- have separate lsp-hover-like option
 -- add term -> manpage term translator table
+-- use highlight group if keyword is unavailable
 local function make_floatwin(term)
   local config_defaults = {
     man_height = 0.85,
@@ -70,7 +71,6 @@ function M.tmux_show_man_floatwin()
   make_floatwin(search_term)
 end
 
-
 -- Format command output into chunks to match structure required by nvim_echo()
 local function make_result_chunks(result, hl_group)
   local r = {}
@@ -80,22 +80,26 @@ local function make_result_chunks(result, hl_group)
   return r
 end
 
--- Execute line as tmux command
--- TODO
--- capture and print error output
-local function exec_tmux_cmd(line)
-
+local function exec_tmux_job(args)
   local result
   local return_value
 
   Job:new({
     command = "tmux",
-    args = line,
+    args = args,
     on_exit = function(j, return_val)
       result = j:result()
       return_value = return_val
     end,
   }):sync()
+  return { result, return_value }
+end
+
+-- Execute line as tmux command
+-- TODO
+-- capture and print error output
+local function exec_tmux_cmd(line)
+  local result, return_value = exec_tmux_job(line)
 
   local result_chunks
   if return_value == 0 then
@@ -104,6 +108,18 @@ local function exec_tmux_cmd(line)
     result_chunks = make_result_chunks({ "command failed: " .. table.concat(line, " ") }, "Error")
   end
   vim.api.nvim_echo(result_chunks, false, {})
+  return return_value
+end
+
+-- Equivalent to included :make command but using Plenary job routine
+-- TODO
+-- Get better error printing
+function M.source_tmux_conf()
+  local args = { "source", vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()) }
+  local _, return_value = exec_tmux_job(args)
+  if return_value == 1 then
+    vim.api.nvim_echo({ { "Source .tmux.conf failed", "Error" } }, false, {})
+  end
   return return_value
 end
 
@@ -144,12 +160,5 @@ function M.tmux_execute_selection()
     exec_tmux_cmd(line)
   end
 end
-
--- keyword/highlight group based jump (????)
-
--- basic compile equivalent using plenary job
-
--- testing
-
 
 return M
