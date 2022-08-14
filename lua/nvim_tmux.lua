@@ -5,8 +5,7 @@ M.config = {
   man_floatwin_height = 0.85,
   man_floatwin_width = 0.85,
   man_floatwin_style = "minimal",
-  man_floatwin_border = "single"
-
+  man_floatwin_border = "single",
 }
 
 M.setup = function(args)
@@ -33,6 +32,7 @@ end
 -- have separate lsp-hover-like option
 -- add term -> manpage term translator table
 -- use highlight group if keyword is unavailable
+-- strings with dashes seem to not work
 local function make_floatwin(term)
   local ui = vim.api.nvim_list_uis()[1]
   local win_height = math.ceil(ui.height * M.config.man_floatwin_height)

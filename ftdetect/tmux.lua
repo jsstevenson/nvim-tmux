@@ -6,4 +6,3 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufNewFile" }, {
     vim.bo.filetype = "tmux"
   end,
 })
-
