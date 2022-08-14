@@ -13,8 +13,6 @@ M.setup = function(args)
 end
 
 -- Get tmux man page text.
--- TODO:
--- only compute this once, or something
 local function get_tmux_man()
   local lines = {}
   for line in io.popen("man tmux | col -b"):lines() do
@@ -24,15 +22,6 @@ local function get_tmux_man()
 end
 
 -- Build floating window scrolled to entry for the given term.
--- TODO:
--- set return cursor point
--- set window line numberings?
--- don't remove formatting
--- how to provide user-configs, default configs
--- have separate lsp-hover-like option
--- add term -> manpage term translator table
--- use highlight group if keyword is unavailable
--- strings with dashes seem to not work
 local function make_floatwin(term)
   local ui = vim.api.nvim_list_uis()[1]
   local win_height = math.ceil(ui.height * M.config.man_floatwin_height)
@@ -103,8 +92,6 @@ local function exec_tmux_job(args)
 end
 
 -- Execute line as tmux command
--- TODO
--- capture and print error output
 local function exec_tmux_cmd(line)
   local result, return_value = exec_tmux_job(line)
 
@@ -118,23 +105,8 @@ local function exec_tmux_cmd(line)
   return return_value
 end
 
--- Equivalent to included :make command but using Plenary job routine
--- TODO
--- Get better error printing
-function M.tmux_source_file()
-  local file_path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
-  local args = { "source", file_path }
-  local _, return_value = exec_tmux_job(args)
-  if return_value == 1 then
-    vim.api.nvim_echo({ { "Source " .. file_path .. " failed", "Error" } }, false, {})
-  end
-  return return_value
-end
-
 -- Retrieve lines contained by visual selection.
 -- This is copied ~verbatim from... somewhere on Reddit or Stackoverflow.
--- TODO
--- Retrieve complete lines, rather than that broken up by block or regular visual mode
 local function get_visual_selection()
   local s_start = vim.fn.getpos("'<")
   local s_end = vim.fn.getpos("'>")
@@ -150,8 +122,6 @@ local function get_visual_selection()
 end
 
 -- Execute tmux command under current cursor/selection
--- TODO
--- more thorough testing, incl. with keymaps
 function M.tmux_execute_selection()
   local position = vim.fn.getpos(".")
   local visual_position = vim.fn.getpos("v")
@@ -167,6 +137,17 @@ function M.tmux_execute_selection()
     local line = vim.api.nvim_buf_get_lines(0, position[2] - 1, position[2], false)
     exec_tmux_cmd(line)
   end
+end
+
+-- Equivalent to included :make command but using Plenary job routine
+function M.tmux_source_file()
+  local file_path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+  local args = { "source", file_path }
+  local _, return_value = exec_tmux_job(args)
+  if return_value == 1 then
+    vim.api.nvim_echo({ { "Source " .. file_path .. " failed", "Error" } }, false, {})
+  end
+  return return_value
 end
 
 return M
