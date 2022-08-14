@@ -121,11 +121,12 @@ end
 -- Equivalent to included :make command but using Plenary job routine
 -- TODO
 -- Get better error printing
-function M.source_tmux_conf()
-  local args = { "source", vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()) }
+function M.tmux_source_file()
+  local file_path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+  local args = { "source", file_path }
   local _, return_value = exec_tmux_job(args)
   if return_value == 1 then
-    vim.api.nvim_echo({ { "Source .tmux.conf failed", "Error" } }, false, {})
+    vim.api.nvim_echo({ { "Source " .. file_path .. " failed", "Error" } }, false, {})
   end
   return return_value
 end
