@@ -1,6 +1,18 @@
 local M = {}
 local Job = require("plenary.job")
 
+M.config = {
+  man_floatwin_height = 0.85,
+  man_floatwin_width = 0.85,
+  man_floatwin_style = "minimal",
+  man_floatwin_border = "single"
+
+}
+
+M.setup = function(args)
+  M.config = vim.tbl_deep_extend("force", M.config, args or {})
+end
+
 -- Get tmux man page text.
 -- TODO:
 -- only compute this once, or something
@@ -22,14 +34,9 @@ end
 -- add term -> manpage term translator table
 -- use highlight group if keyword is unavailable
 local function make_floatwin(term)
-  local config_defaults = {
-    man_height = 0.85,
-    man_width = 0.85,
-  }
-
   local ui = vim.api.nvim_list_uis()[1]
-  local win_height = math.ceil(ui.height * config_defaults.man_height)
-  local win_width = math.ceil(ui.width * config_defaults.man_width)
+  local win_height = math.ceil(ui.height * M.config.man_floatwin_height)
+  local win_width = math.ceil(ui.width * M.config.man_floatwin_width)
   local win_opts = {
     relative = "editor",
     col = (ui.width / 2) - (win_width / 2),
@@ -37,9 +44,9 @@ local function make_floatwin(term)
     height = win_height,
     width = win_width,
     anchor = "NW",
-    border = "single",
+    border = M.config.man_floatwin_border,
     noautocmd = true,
-    style = "minimal",
+    style = M.config.man_floatwin_style,
   }
   local buf = vim.api.nvim_create_buf(false, true)
 
