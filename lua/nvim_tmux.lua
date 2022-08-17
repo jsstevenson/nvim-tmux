@@ -1,20 +1,12 @@
 local M = {}
 local Job = require("plenary.job")
 local Config = require("nvim_tmux.config")
+local Man = require("nvim_tmux.man")
 
 -- initialize user configs
 M.setup = function(config)
   local cfg = Config:set(config):get()
   return cfg
-end
-
--- Get tmux man page text.
-local function get_tmux_man()
-  local lines = {}
-  for line in io.popen("man tmux | col -b"):lines() do
-    lines[#lines + 1] = line
-  end
-  return lines
 end
 
 -- Build floating window scrolled to entry for the given term.
@@ -39,15 +31,9 @@ local function make_floatwin(term)
   vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { nowait = true, noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, "n", "<ESC>", ":close<CR>", { nowait = true, noremap = true, silent = true })
 
-  local man_text = get_tmux_man()
+  local man_text = Man.get_tmux_man()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, man_text)
-  local cursor_line = nil
-  for i, line in ipairs(man_text) do
-    if string.find(line, term) then
-      cursor_line = i
-      break
-    end
-  end
+  local cursor_line = Man.get_man_line_number(term)
   if cursor_line == nil then
     print("Unrecognized tmux keyword: " .. term)
     return
