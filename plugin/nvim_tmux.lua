@@ -1,22 +1,39 @@
-local K = vim.keymap.set
+if 1 ~= vim.fn.has("nvim-0.7.0") then
+  vim.api.nvim_err_writeln("nvim-tmux requires at least nvim-0.7.0.")
+  return
+end
 
-K(
+if vim.g.loaded_nvim_tmux == 1 then
+  return
+end
+vim.g.loaded_nvim_tmux = 1
+
+local nvim_tmux = require("nvim_tmux")
+
+vim.keymap.set(
   "n",
   "<Plug>(tmux_show_man_floatwin)",
-  "<CMD>lua require('tmux_nvim').tmux_show_man_floatwin()<CR>g@",
-  { desc = "Show man for term under cursor in floating window" }
+  function() nvim_tmux.show_man_floatwin() end,
+  {}
 )
 
-K(
+vim.keymap.set(
   "n",
   "<Plug>(tmux_source_file)",
-  "<CMD>lua require('tmux_nvim').tmux_source_file()<CR>g@",
+  function() vim.api.nvim_command("TmuxSource") end,
   { desc = "Tmux source file in current buffer" }
 )
 
-K(
+vim.keymap.set(
   "n",
+  "<Plug>(tmux_execute_cursorline)",
+  function() nvim_tmux.execute_cursorline() end,
+  { desc = "Tmux execute cursorline" }
+)
+
+vim.keymap.set(
+  "v",
   "<Plug>(tmux_execute_selection)",
-  "<ESC><CMD>lua require('tmux_nvim').tmux_execute_selection()<CR>",
-  { desc = "Tmux execute currently selected command(s)" }
+  function() nvim_tmux.execute_selection() end,
+  { desc = "Tmux execute selected line(s)"}
 )
