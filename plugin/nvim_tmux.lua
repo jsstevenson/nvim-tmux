@@ -15,7 +15,7 @@ vim.keymap.set("n", "<Plug>(tmux_show_man_floatwin)", function()
 end, {})
 
 vim.keymap.set("n", "<Plug>(tmux_source_file)", function()
-  vim.api.nvim_command("TmuxSource")
+  nvim_tmux.source_file()
 end, { desc = "Tmux source file in current buffer" })
 
 vim.keymap.set("n", "<Plug>(tmux_execute_cursorline)", function()
