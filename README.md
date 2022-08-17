@@ -6,11 +6,12 @@ Neovim plugin for editing Tmux configuration and scripting files. Consists large
 
 * Improved file detection
 * Incorporation of the built-in Neovim compilation tooling -- provides a `compile/` file that sets the `makeprg` and `errorformat` settings used by `:make` to call `tmux source` on the file loaded in the current buffer. A Lua funciton to do the same with the [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) Job API is included as well.
-* Key command to execute the highlighted or visually selected line(s)
-* Key command to show the man page entry for the item under the cursor in a floating window
+* Execute command under cursorline or visual select
+* Show the man page entry for the item under the cursor in a floating window
 
 ## Requirements
 
+* Neovim 0.7.0+
 * Tmux
 * [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
@@ -47,4 +48,13 @@ local nvim_tmux_default_configs = {
   -- :h nvim_open_win for the complete list of options.
   man_floatwin_border = "single"
 }
+```
+
+No keymaps are provided by default, but you can put the following into an `augroup` or `ftplugin/tmux.lua`:
+
+```lua
+vim.keymap.set("n", "<leader>s", "<Plug>(tmux_source_file)", { silent = true, remap = false })
+vim.keymap.set("n", "K", "<Plug>(tmux_show_man_floatwin)", { silent = true, remap = false })
+vim.keymap.set("n", "g!!", "<Plug>(tmux_execute_cursorline)", { silent = true, remap = false })
+vim.keymap.set("v", "g!", "<Plug>(tmux_execute_selection)", { silent = true, remap = false })
 ```

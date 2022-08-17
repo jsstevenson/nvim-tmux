@@ -1,15 +1,11 @@
 local M = {}
 local Job = require("plenary.job")
+local Config = require("nvim_tmux.config")
 
-M.config = {
-  man_floatwin_height = 0.85,
-  man_floatwin_width = 0.85,
-  man_floatwin_style = "minimal",
-  man_floatwin_border = "single",
-}
-
-M.setup = function(args)
-  M.config = vim.tbl_deep_extend("force", M.config, args or {})
+-- initialize user configs
+M.setup = function(config)
+  local cfg = Config:set(config):get()
+  return cfg
 end
 
 -- Get tmux man page text.
@@ -24,8 +20,9 @@ end
 -- Build floating window scrolled to entry for the given term.
 local function make_floatwin(term)
   local ui = vim.api.nvim_list_uis()[1]
-  local win_height = math.ceil(ui.height * M.config.man_floatwin_height)
-  local win_width = math.ceil(ui.width * M.config.man_floatwin_width)
+  local cfg = Config:get()
+  local win_height = math.ceil(ui.height * cfg.floatwin.height)
+  local win_width = math.ceil(ui.width * cfg.floatwin.width)
   local win_opts = {
     relative = "editor",
     col = (ui.width / 2) - (win_width / 2),
@@ -33,9 +30,9 @@ local function make_floatwin(term)
     height = win_height,
     width = win_width,
     anchor = "NW",
-    border = M.config.man_floatwin_border,
+    border = cfg.floatwin.border,
     noautocmd = true,
-    style = M.config.man_floatwin_style,
+    style = cfg.floatwin.style,
   }
   local buf = vim.api.nvim_create_buf(false, true)
 
@@ -62,7 +59,7 @@ local function make_floatwin(term)
 end
 
 -- Open floating window with man page entry for term under cursor.
-function M.tmux_show_man_floatwin()
+function M.show_man_floatwin()
   local search_term = vim.call("expand", "<cWORD>")
   make_floatwin(search_term)
 end
@@ -93,54 +90,51 @@ end
 
 -- Execute line as tmux command
 local function exec_tmux_cmd(line)
-  local result, return_value = exec_tmux_job(line)
+  local line_args = {}
+  for i in line:gmatch("%g+") do
+    table.insert(line_args, i)
+  end
+  local job_result = exec_tmux_job(line_args)
 
   local result_chunks
-  if return_value == 0 then
-    result_chunks = make_result_chunks(result)
+  if job_result[2] == 0 then
+    result_chunks = make_result_chunks(job_result[1])
   else
-    result_chunks = make_result_chunks({ "command failed: " .. table.concat(line, " ") }, "Error")
+    result_chunks = make_result_chunks({ "command failed: " .. line }, "Error")
   end
   vim.api.nvim_echo(result_chunks, false, {})
-  return return_value
+  return job_result[2]
 end
 
--- Retrieve lines contained by visual selection.
--- This is copied ~verbatim from... somewhere on Reddit or Stackoverflow.
+-- Execute tmux command under current cursorline
+function M.execute_cursorline()
+  local pos = vim.fn.getpos(".")
+  local line = vim.api.nvim_buf_get_lines(0, pos[2] - 1, pos[2], false)
+  exec_tmux_cmd(line[1])
+end
+
+-- Retrieve lines contained by visual selection
 local function get_visual_selection()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, false, true), "x", true)
   local s_start = vim.fn.getpos("'<")
   local s_end = vim.fn.getpos("'>")
-  local n_lines = math.abs(s_end[2] - s_start[2]) + 1
   local lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_end[2], false)
-  lines[1] = string.sub(lines[1], s_start[3], -1)
-  if n_lines == 1 then
-    lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3] - s_start[3] + 1)
-  else
-    lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3])
-  end
-  return table
+  return lines
 end
 
--- Execute tmux command under current cursor/selection
-function M.tmux_execute_selection()
-  local position = vim.fn.getpos(".")
-  local visual_position = vim.fn.getpos("v")
-  if position[2] ~= visual_position[2] then
-    local lines = get_visual_selection()
-    for _, line in ipairs(lines) do
-      local return_value = exec_tmux_cmd(line)
-      if return_value ~= 0 then
-        break
-      end
+-- Execute tmux command under current visual selection
+function M.execute_selection()
+  local lines = get_visual_selection()
+  for _, line in ipairs(lines) do
+    local return_value = exec_tmux_cmd(line)
+    if return_value ~= 0 then
+      break
     end
-  else
-    local line = vim.api.nvim_buf_get_lines(0, position[2] - 1, position[2], false)
-    exec_tmux_cmd(line)
   end
 end
 
 -- Equivalent to included :make command but using Plenary job routine
-function M.tmux_source_file()
+function M.source_file()
   local file_path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
   local args = { "source", file_path }
   local _, return_value = exec_tmux_job(args)
