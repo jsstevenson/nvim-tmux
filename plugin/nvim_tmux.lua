@@ -10,30 +10,18 @@ vim.g.loaded_nvim_tmux = 1
 
 local nvim_tmux = require("nvim_tmux")
 
-vim.keymap.set(
-  "n",
-  "<Plug>(tmux_show_man_floatwin)",
-  function() nvim_tmux.show_man_floatwin() end,
-  {}
-)
+vim.keymap.set("n", "<Plug>(tmux_show_man_floatwin)", function()
+  nvim_tmux.show_man_floatwin()
+end, {})
 
-vim.keymap.set(
-  "n",
-  "<Plug>(tmux_source_file)",
-  function() vim.api.nvim_command("TmuxSource") end,
-  { desc = "Tmux source file in current buffer" }
-)
+vim.keymap.set("n", "<Plug>(tmux_source_file)", function()
+  vim.api.nvim_command("TmuxSource")
+end, { desc = "Tmux source file in current buffer" })
 
-vim.keymap.set(
-  "n",
-  "<Plug>(tmux_execute_cursorline)",
-  function() nvim_tmux.execute_cursorline() end,
-  { desc = "Tmux execute cursorline" }
-)
+vim.keymap.set("n", "<Plug>(tmux_execute_cursorline)", function()
+  nvim_tmux.execute_cursorline()
+end, { desc = "Tmux execute cursorline" })
 
-vim.keymap.set(
-  "v",
-  "<Plug>(tmux_execute_selection)",
-  function() nvim_tmux.execute_selection() end,
-  { desc = "Tmux execute selected line(s)"}
-)
+vim.keymap.set("v", "<Plug>(tmux_execute_selection)", function()
+  nvim_tmux.execute_selection()
+end, { desc = "Tmux execute selected line(s)" })
