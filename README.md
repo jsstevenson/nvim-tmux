@@ -31,22 +31,24 @@ With [packer.nvim](https://github.com/wbthomason/packer.nvim):
 
 ## Configuration
 
-Provide a table containing any of the following keys to `setup()` -- defaults are below:
+Provide a table overwriting any of the following keys to `setup()` -- defaults are below:
 
 ```lua
 local nvim_tmux_default_configs = {
-  -- Height and width of tmux man page display in floating window. Should be
-  -- values between 0 and 1, reflecting the % of the buffer height/width to use
-  man_floatwin_height = 0.85,
-  man_floatwin_width = 0.85,
+  floatwin = {
+    -- Height and width of tmux man page display in floating window. Should be
+    -- values between 0 and 1, reflecting the % of the buffer height/width to use
+    height = 0.85,
+    width = 0.85,
 
-  -- Styling of man page floating window. Set to `nil` to enable line number,
-  -- color columns, etc (see `style` under :h nvim_open_win)
-  man_floatwin_style = "minimal",
+    -- Styling of man page floating window. Set to `nil` to enable line number,
+    -- color columns, etc (see `style` under :h nvim_open_win)
+    style = "minimal",
 
-  -- Styling of man page floating window border. See `border` under
-  -- :h nvim_open_win for the complete list of options.
-  man_floatwin_border = "single"
+    -- Styling of man page floating window border. See `border` under
+    -- :h nvim_open_win for the complete list of options.
+    border = "single"
+  }
 }
 ```
 
