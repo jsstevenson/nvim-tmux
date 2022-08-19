@@ -31,7 +31,7 @@ local function make_floatwin(term)
   vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { nowait = true, noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, "n", "<ESC>", ":close<CR>", { nowait = true, noremap = true, silent = true })
 
-  local man_text = Man.get_tmux_man()
+  local man_text = Man:get_tmux_man()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, man_text)
   local cursor_line = Man.get_man_line_number(term)
   if cursor_line == nil then
