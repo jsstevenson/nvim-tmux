@@ -1,4 +1,4 @@
-local M = {}
+local Man = {}
 
 -- capture term -> search pattern mappings
 local option_mappings = {}
@@ -155,17 +155,20 @@ special_patterns["update%-environment%[%d+]"] = "update%-environment%[]"
 special_patterns["pane%-colours%[%d+]"] = "pane%-colours%[]"
 
 -- Get tmux man page text
-function M.get_tmux_man()
-  local lines = {}
-  for line in io.popen("man tmux | col -b"):lines() do
-    lines[#lines + 1] = line
+function Man.get_tmux_man(self)
+  if not self.man_text then
+    local lines = {}
+    for line in io.popen("man tmux | col -b"):lines() do
+      lines[#lines + 1] = line
+    end
+    self.man_text = lines
   end
-  return lines
+  return self.man_text
 end
 
 -- Find definition line for given term
-function M.get_man_line_number(term)
-  local man_text = M.get_tmux_man()
+function Man.get_man_line_number(term)
+  local man_text = Man:get_tmux_man()
   local pattern
   if option_mappings[term] then
     pattern = option_mappings[term]
@@ -184,7 +187,6 @@ function M.get_man_line_number(term)
   if not pattern then
     pattern = string.gsub(term, "%-", "%%-")
   end
-  vim.pretty_print(term)
   for i, line in ipairs(man_text) do
     if string.find(line, pattern) then
       return i
@@ -193,4 +195,4 @@ function M.get_man_line_number(term)
   return nil
 end
 
-return M
+return Man

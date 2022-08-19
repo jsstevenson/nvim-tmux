@@ -11,7 +11,7 @@ vim.g.loaded_nvim_tmux = 1
 local nvim_tmux = require("nvim_tmux")
 
 vim.keymap.set("n", "<Plug>(tmux_show_man_floatwin)", function()
-  nvim_tmux.show_man_floatwin()
+  nvim_tmux:show_man_floatwin()
 end, {})
 
 vim.keymap.set("n", "<Plug>(tmux_source_file)", function()
