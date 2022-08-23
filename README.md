@@ -5,14 +5,14 @@ Neovim plugin for editing Tmux configuration and scripting files. Consists large
 ## Features
 
 * Improved file detection
-* Incorporation of the built-in Neovim compilation tooling -- provides a `compile/` file that sets the `makeprg` and `errorformat` settings used by `:make` to call `tmux source` on the file loaded in the current buffer. A Lua funciton to do the same with the [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) Job API is included as well.
+* Support for `:make`, calling `tmux source` on the file in the current buffer. A Lua function to do the same with the [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) Job API is included as well.
 * Execute command under cursorline or visual select
 * Show the man page entry for the item under the cursor in a floating window
 
 ## Requirements
 
 * Neovim 0.7.0+
-* Tmux
+* Tmux (tested on 3.3a)
 * [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
 ## Installation
